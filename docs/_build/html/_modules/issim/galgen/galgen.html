@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>issim.galgen.galgen &mdash; issim 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            issim
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">ISsiM</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">issim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">issim.galgen.galgen</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for issim.galgen.galgen</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
+<span class="kn">import</span> <span class="nn">matplotlib.animation</span> <span class="k">as</span> <span class="nn">animation</span>
+<span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">display</span><span class="p">,</span> <span class="n">clear_output</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">..issim</span> <span class="kn">import</span> <span class="n">simulate</span>
+
+<span class="c1">#you need ffmpeg package installed</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;animation.embed_limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">128</span>
+
+
+<span class="n">TrueG</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.67430</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">11</span><span class="p">))</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">kg</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">second</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> 
+<span class="n">SolG</span> <span class="o">=</span> <span class="n">TrueG</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">AU</span><span class="o">**</span><span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">solMass</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">year</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">milkmass</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">def_unit</span><span class="p">(</span><span class="s1">&#39;milkmass&#39;</span><span class="p">,</span> <span class="mf">1.15</span><span class="o">*</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solMass</span><span class="p">)</span>
+<span class="n">milkrad</span> <span class="o">=</span>  <span class="n">u</span><span class="o">.</span><span class="n">def_unit</span><span class="p">(</span><span class="s1">&#39;milkrad&#39;</span><span class="p">,</span> <span class="mi">30</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">kiloparsec</span><span class="p">)</span>
+<span class="n">MilkG</span> <span class="o">=</span> <span class="n">TrueG</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">milkrad</span><span class="o">**</span><span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="n">milkmass</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">megayear</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+<div class="viewcode-block" id="timepull"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.timepull">[docs]</a><span class="k">def</span> <span class="nf">timepull</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the index of the closest time in a simulation to a given time.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - simulation: A tuple containing positions, colors, and times of the simulation.</span>
+<span class="sd">    - time: The time to find in the simulation.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - index: The index of the closest time in the simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">difference_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">times</span><span class="o">-</span><span class="n">time</span><span class="p">)</span>
+    <span class="c1"># find the index of minimum element from the array</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">difference_array</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">index</span> </div>
+
+<div class="viewcode-block" id="generate_3d_exponential_cylindrical"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.generate_3d_exponential_cylindrical">[docs]</a><span class="k">def</span> <span class="nf">generate_3d_exponential_cylindrical</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate 3D coordinates in cylindrical space where the radial distance follows</span>
+<span class="sd">    a radial exponential distribution and z-coordinates are uniformly distributed.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - n: Number of points to generate.</span>
+<span class="sd">    - lambda_r: Rate parameter (λ) for the radial distance&#39;s exponential distribution.</span>
+<span class="sd">    - z_min: Minimum z-coordinate.</span>
+<span class="sd">    - z_max: Maximum z-coordinate.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - A numpy array of shape (n, 3) containing the 3D coordinates.</span>
+
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import generate_3d_exponential_cylindrical</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Generating 1000 points with a radius of 2 units and a height of 5 units</span>
+<span class="sd">    &gt;&gt;&gt; points = generate_3d_exponential_cylindrical(1000, 2, 5)</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Check the shape of the generated points</span>
+<span class="sd">    &gt;&gt;&gt; points.shape</span>
+<span class="sd">    (1000, 3)</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Visualize the generated points in 3D space</span>
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; from mpl_toolkits.mplot3d import Axes3D</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; fig = plt.figure()</span>
+<span class="sd">    &gt;&gt;&gt; ax = fig.add_subplot(111, projection=&#39;3d&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ax.scatter(points[:,0], points[:,1], points[:,2])</span>
+<span class="sd">    &gt;&gt;&gt; ax.set_xlabel(&#39;X&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ax.set_ylabel(&#39;Y&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ax.set_zlabel(&#39;Z&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; plt.show()</span>
+<span class="sd">    </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Radial distances</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    
+    <span class="c1"># Azimuthal angle, theta, uniformly distributed between 0 and 2pi</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    
+    <span class="c1"># z-coordinates uniformly distributed</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">height</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">height</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    
+    <span class="c1"># Convert cylindrical coordinates to Cartesian coordinates</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span><span class="o">.</span><span class="n">T</span></div>
+
+
+
+<div class="viewcode-block" id="exponentialdiskvelocity"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.exponentialdiskvelocity">[docs]</a><span class="k">def</span> <span class="nf">exponentialdiskvelocity</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">Rdisk</span><span class="p">,</span> <span class="n">R</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculates the angular velocity of an object at a certain radial distance </span>
+<span class="sd">    within an exponential disk galaxy using a simplified model. This function </span>
+<span class="sd">    assumes an exponential disk mass distribution and utilizes specific Bessel </span>
+<span class="sd">    functions to estimate the velocity.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - G (float): Gravitational constant. Ensure consistent units are used</span>
+<span class="sd">                 throughout all parameters.</span>
+<span class="sd">    - M (float): Total mass of the galaxy or the mass enclosed within a certain</span>
+<span class="sd">                 radius. Again, consistent units with G are essential.</span>
+<span class="sd">    - Rdisk (float): Scale length of the galaxy&#39;s exponential disk. This parameter</span>
+<span class="sd">                     defines how rapidly the disk&#39;s density decreases with radius</span>
+<span class="sd">                     from the center of the galaxy.</span>
+<span class="sd">    - R (float or array_like): Radial distance(s) from the center of the galaxy </span>
+<span class="sd">                               at which to calculate the angular velocity. Can be</span>
+<span class="sd">                               a single value or an array of values for calculating</span>
+<span class="sd">                               velocities at multiple radii simultaneously.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - vels (float or ndarray): The angular velocity (or velocities if R is an array) </span>
+<span class="sd">                               at the specified radial distance(s) from the galaxy&#39;s </span>
+<span class="sd">                               center. The return type matches the input type of R.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">    - This function uses the special.iv (modified Bessel function of the first kind)</span>
+<span class="sd">      and special.kv (modified Bessel function of the second kind) from the SciPy</span>
+<span class="sd">      library to compute the velocities. Ensure SciPy is installed and imported</span>
+<span class="sd">      correctly in your environment.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    ```python</span>
+<span class="sd">    import numpy as np</span>
+<span class="sd">    from scipy import special</span>
+<span class="sd">    G = 6.67430e-11  # Gravitational constant in m^3 kg^-1 s^-2</span>
+<span class="sd">    M = 1e11  # Mass of the galaxy in kg</span>
+<span class="sd">    Rdisk = 3.5e3  # Scale length of the galaxy&#39;s disk in light-years</span>
+<span class="sd">    R = np.array([8000, 15000])  # Radial distances in light-years</span>
+<span class="sd">    velocities = exponentialdiskvelocity(G, M, Rdisk, R)</span>
+<span class="sd">    print(velocities)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    The output will be the angular velocities at the specified radial distances.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">yvals</span> <span class="o">=</span> <span class="n">R</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Rdisk</span><span class="p">)</span>
+    <span class="n">frontvalus</span> <span class="o">=</span> <span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">G</span><span class="o">*</span><span class="n">M</span><span class="p">)</span><span class="o">/</span><span class="n">Rdisk</span><span class="p">)</span> <span class="o">*</span> <span class="n">yvals</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">bessels</span> <span class="o">=</span> <span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">iv</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">yvals</span><span class="p">)</span> <span class="o">*</span> <span class="n">special</span><span class="o">.</span><span class="n">kv</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">yvals</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">iv</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">yvals</span><span class="p">)</span> <span class="o">*</span> <span class="n">special</span><span class="o">.</span><span class="n">kv</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">yvals</span><span class="p">))</span>
+    <span class="n">vels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">frontvalus</span><span class="o">*</span><span class="n">bessels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vels</span></div>
+
+<div class="viewcode-block" id="normalize_vectors"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.normalize_vectors">[docs]</a><span class="k">def</span> <span class="nf">normalize_vectors</span><span class="p">(</span><span class="n">vectors</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalize a list or array of 3D vectors to their unit vectors.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - vectors: A list or a numpy array of shape (n, 3) where n is the number of vectors</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    - A numpy array of shape (n, 3) containing the unit vectors.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import normalize_vectors</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Define some 3D vectors</span>
+<span class="sd">    &gt;&gt;&gt; vectors = np.array([[1, 2, 2], [3, 4, 5], [6, 7, 8]])</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Normalize the vectors</span>
+<span class="sd">    &gt;&gt;&gt; normalized_vectors = normalize_vectors(vectors)</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Check the normalized vectors</span>
+<span class="sd">    &gt;&gt;&gt; normalized_vectors</span>
+<span class="sd">    array([[0.33333333, 0.66666667, 0.66666667],</span>
+<span class="sd">           [0.42426407, 0.56568542, 0.70710678],</span>
+<span class="sd">           [0.46666667, 0.54772256, 0.6289709 ]])</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Check if the magnitudes of the normalized vectors are approximately 1</span>
+<span class="sd">    &gt;&gt;&gt; np.linalg.norm(normalized_vectors, axis=1)</span>
+<span class="sd">    array([1., 1., 1.])</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>  <span class="c1"># Ensure input is converted to a numpy array</span>
+    <span class="n">magnitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>  <span class="c1"># Calculate magnitudes and reshape for broadcasting</span>
+    <span class="n">unit_vectors</span> <span class="o">=</span> <span class="n">vectors</span> <span class="o">/</span> <span class="n">magnitudes</span>  <span class="c1"># Normalize</span>
+    
+    <span class="k">return</span> <span class="n">unit_vectors</span></div>
+
+<div class="viewcode-block" id="radiuscalc2Dcylinder"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.radiuscalc2Dcylinder">[docs]</a><span class="k">def</span> <span class="nf">radiuscalc2Dcylinder</span><span class="p">(</span><span class="n">vectors</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the radial positions of 3D vectors projected onto a 2D cylindrical space.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - vectors: A numpy array of shape (n, 3) containing the 3D vectors.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - A numpy array of shape (n,) containing the radial positions of the vectors in 2D cylindrical space.</span>
+<span class="sd">    </span>
+<span class="sd">    The radial position of a vector in cylindrical coordinates is calculated as the Euclidean distance </span>
+<span class="sd">    from the origin to the projection of the vector onto the xy-plane.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import radiuscalc2Dcylinder</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Define some 3D vectors</span>
+<span class="sd">    &gt;&gt;&gt; vectors = np.array([[1, 2, 2], [3, 4, 5], [6, 7, 8]])</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Calculate the radial positions of the vectors in 2D cylindrical space</span>
+<span class="sd">    &gt;&gt;&gt; radial_positions = radiuscalc2Dcylinder(vectors)</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; # Check the radial positions</span>
+<span class="sd">    &gt;&gt;&gt; radial_positions</span>
+<span class="sd">    array([2.23606798, 5.        , 9.21954446])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">radvectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">vectors</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">vectors</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">radvectors</span> </div>
+
+
+<div class="viewcode-block" id="Galaxy"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.Galaxy">[docs]</a><span class="k">class</span> <span class="nc">Galaxy</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A class for generating the initial conditions for a spiral galaxy, running simulations, and generating animations of those simulations. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">scaleheight</span><span class="p">,</span> <span class="n">randvel</span><span class="p">,</span><span class="n">G</span> <span class="o">=</span><span class="mf">0.00019160287</span><span class="p">,</span>  <span class="n">k</span> <span class="o">=</span> <span class="mf">0.4246</span> <span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">4</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="n">nu</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a Galaxy object.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - N: The number of particles in the galaxy.</span>
+<span class="sd">        - mass: The mass of the galaxy.</span>
+<span class="sd">        - radius: The radius of the galaxy.</span>
+<span class="sd">        - scaleheight: The scale height of the galaxy.</span>
+<span class="sd">        - randvel: The magnitude of random velocities for the particles.</span>
+<span class="sd">        - G: The gravitational constant (default is 0.00019160287).</span>
+<span class="sd">        - k: The equation of state constant (default is 0.4246).</span>
+<span class="sd">        - n: The polytropic index (default is 4/3).</span>
+<span class="sd">        - nu: The viscosity coefficient (default is 0.1).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1">#stored constants </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particles</span> <span class="o">=</span> <span class="n">N</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaleheight</span> <span class="o">=</span> <span class="n">scaleheight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomvel</span> <span class="o">=</span> <span class="n">randvel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Grav</span> <span class="o">=</span> <span class="n">G</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">konstant</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pindex</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span> <span class="o">=</span> <span class="n">nu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="c1">#generate the galaxy </span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;...generating galaxy&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particlemass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="n">generate_3d_exponential_cylindrical</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaleheight</span><span class="p">)</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">radialvelocities</span> <span class="o">=</span>  <span class="n">exponentialdiskvelocity</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Grav</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">radiuscalc2Dcylinder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomvelocities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomvel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="o">=</span> <span class="p">(</span><span class="n">normalize_vectors</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radialvelocities</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomvelocities</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;...galaxy generated&#39;</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="Galaxy.regenerate"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.Galaxy.regenerate">[docs]</a>    <span class="k">def</span> <span class="nf">regenerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Regenerate the galaxy with the same parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#generate the galaxy </span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;...generating galaxy&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particlemass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="n">generate_3d_exponential_cylindrical</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaleheight</span><span class="p">)</span>   
+        <span class="bp">self</span><span class="o">.</span><span class="n">radialvelocities</span> <span class="o">=</span>  <span class="n">exponentialdiskvelocity</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Grav</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">radiuscalc2Dcylinder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomvelocities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomvel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="o">=</span> <span class="p">(</span><span class="n">normalize_vectors</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radialvelocities</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomvelocities</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;...galaxy generated&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Galaxy.simulate"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.Galaxy.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoothinglength</span><span class="p">,</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">tEnd</span><span class="p">,</span> <span class="n">tStart</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simulate the movement of particles in the galaxy.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - smoothinglength: The smoothing length for SPH calculations.</span>
+<span class="sd">        - tstep: The time step for integration.</span>
+<span class="sd">        - tEnd: The end time of the simulation.</span>
+<span class="sd">        - tStart: The start time of the simulation (default is 0).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        - simulation: A tuple containing positions, colors, and times of the simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span> <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">,</span> <span class="n">tStart</span> <span class="o">=</span> <span class="n">tStart</span><span class="p">,</span> <span class="n">tstep</span> <span class="o">=</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">tEnd</span> <span class="o">=</span> <span class="n">tEnd</span><span class="p">,</span> <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">,</span> <span class="n">masses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">particlemass</span><span class="p">,</span> 
+                                    <span class="n">h</span> <span class="o">=</span> <span class="n">smoothinglength</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">konstant</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pindex</span><span class="p">,</span> <span class="n">nu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span><span class="p">,</span> <span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Grav</span><span class="p">,</span> <span class="n">simradius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">plotRealTime</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span></div>
+<div class="viewcode-block" id="Galaxy.plot"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.Galaxy.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">xlim</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylim</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">autumn</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>  <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the galaxy at a specific time.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - time: The time at which to plot the galaxy.</span>
+<span class="sd">        - orientation: The orientation of the plot (&#39;top&#39; or &#39;side&#39;, default is &#39;top&#39;).</span>
+<span class="sd">        - xlim: The x-axis limits of the plot (default is None).</span>
+<span class="sd">        - ylim: The y-axis limits of the plot (default is None).</span>
+<span class="sd">        - cmap: The colormap for density plotting (default is plt.cm.autumn).</span>
+<span class="sd">        - alpha: The transparency of points (default is 0.25).</span>
+<span class="sd">        - s: The size of points (default is 10).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;NO SIMULATION HAS BEEN RUN YET&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">xlim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+            
+        <span class="n">posarr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">colarr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">timepull</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Graphed at time </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">t</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colarr</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span> <span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;side&#39;</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colarr</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span> <span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;NOT A VALID VIEWING DIRECTION&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Galaxy.quadplot"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.Galaxy.quadplot">[docs]</a>    <span class="k">def</span> <span class="nf">quadplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">xlim1</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylim1</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlim2</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylim2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="n">xlim3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylim3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                  <span class="n">xlim4</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylim4</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">autumn</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>  <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the galaxy in four different orientations at a specific time.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - time: The time at which to plot the galaxy.</span>
+<span class="sd">        - xlim1, ylim1: The x-axis and y-axis limits for the first subplot (default is None).</span>
+<span class="sd">        - xlim2, ylim2: The x-axis and y-axis limits for the second subplot (default is None).</span>
+<span class="sd">        - xlim3, ylim3: The x-axis and y-axis limits for the third subplot (default is None).</span>
+<span class="sd">        - xlim4, ylim4: The x-axis and y-axis limits for the fourth subplot (default is None).</span>
+<span class="sd">        - cmap: The colormap for density plotting (default is plt.cm.autumn).</span>
+<span class="sd">        - alpha: The transparency of points (default is 0.25).</span>
+<span class="sd">        - s: The size of points (default is 10).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;NO SIMULATION HAS BEEN RUN YET&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">xlim1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xlim2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xlim3</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim3</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim3</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim3</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xlim4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim4</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim4</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+
+        
+        <span class="n">posarr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">colarr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">timepull</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Graphed at time </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">t</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+        <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ax4</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+        <span class="n">ax4</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+    
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim1</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="n">ylim1</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colarr</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim2</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="n">ylim2</span><span class="p">)</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span> 
+        <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colarr</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">ax3</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim3</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="n">ylim3</span><span class="p">)</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colarr</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+        <span class="n">ax4</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim4</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="n">ylim4</span><span class="p">)</span>
+        <span class="n">ax4</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+        <span class="n">ax4</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax4</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax4</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">ax4</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span>
+        <span class="n">ax4</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">posarr</span><span class="p">[</span><span class="n">t</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colarr</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Galaxy.plotvid"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.Galaxy.plotvid">[docs]</a>    <span class="k">def</span> <span class="nf">plotvid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">xlim</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylim</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">autumn</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>  <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a video of the galaxy&#39;s movement.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - downsampling: The downsampling factor for the video (default is 1).</span>
+<span class="sd">        - orientation: The orientation of the plot (&#39;top&#39; or &#39;side&#39;, default is &#39;top&#39;).</span>
+<span class="sd">        - xlim: The x-axis limits of the plot (default is None).</span>
+<span class="sd">        - ylim: The y-axis limits of the plot (default is None).</span>
+<span class="sd">        - cmap: The colormap for density plotting (default is plt.cm.autumn).</span>
+<span class="sd">        - alpha: The transparency of points (default is 0.25).</span>
+<span class="sd">        - s: The size of points (default is 10).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;NO SIMULATION HAS BEEN RUN YET&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">xlim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;unfinished&#39;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Galaxy.quadplotvid"><a class="viewcode-back" href="../../../issim.galgen.html#issim.galgen.galgen.Galaxy.quadplotvid">[docs]</a>    <span class="k">def</span> <span class="nf">quadplotvid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xlim1</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylim1</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlim2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylim2</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">xlim3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                    <span class="n">ylim3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">xlim4</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylim4</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">autumn</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>  <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a quad-view video of the galaxy&#39;s movement.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - downsampling: The downsampling factor for the video (default is 1).</span>
+<span class="sd">        - orientation: The orientation of the plot (&#39;top&#39; or &#39;side&#39;, default is &#39;top&#39;).</span>
+<span class="sd">        - xlim1, ylim1: The x-axis and y-axis limits for the first subplot (default is None).</span>
+<span class="sd">        - xlim2, ylim2: The x-axis and y-axis limits for the second subplot (default is None).</span>
+<span class="sd">        - xlim3, ylim3: The x-axis and y-axis limits for the third subplot (default is None).</span>
+<span class="sd">        - xlim4, ylim4: The x-axis and y-axis limits for the fourth subplot (default is None).</span>
+<span class="sd">        - cmap: The colormap for density plotting (default is plt.cm.autumn).</span>
+<span class="sd">        - alpha: The transparency of points (default is 0.25).</span>
+<span class="sd">        - s: The size of points (default is 10).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;NO SIMULATION HAS BEEN RUN YET&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="n">xlim1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xlim2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xlim3</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim3</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim3</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim3</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xlim4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlim4</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylim4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylim4</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        
+        
+        <span class="c1"># Downsampling by selecting every nth point</span>
+        <span class="n">posarr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">colarr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="n">positions1</span> <span class="o">=</span> <span class="n">posarr</span><span class="p">[::</span><span class="n">downsampling</span><span class="p">]</span>
+        <span class="n">colors1</span> <span class="o">=</span> <span class="n">colarr</span><span class="p">[::</span><span class="n">downsampling</span><span class="p">]</span> 
+
+    
+        <span class="k">def</span> <span class="nf">update_plot</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+            
+    
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim1</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="n">ylim1</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">positions1</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">positions1</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colors1</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>  <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim2</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="n">ylim2</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span> 
+            <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">positions1</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">positions1</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colors1</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim3</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="n">ylim3</span><span class="p">)</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">positions1</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">positions1</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colors1</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>  <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim4</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="n">ylim4</span><span class="p">)</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">positions1</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">positions1</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">colors1</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>  <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+        <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ax4</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1">#positions, colors = main()</span>
+        <span class="n">ani</span> <span class="o">=</span> <span class="n">FuncAnimation</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">update_plot</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">positions1</span><span class="p">),</span> <span class="n">interval</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="n">display</span><span class="p">(</span><span class="n">HTML</span><span class="p">(</span><span class="n">ani</span><span class="o">.</span><span class="n">to_jshtml</span><span class="p">()))</span>
+        
+        <span class="k">return</span> <span class="n">ani</span></div></div>
+
+
+            
+            
+        
+        
+
+
+            
+            
+            
+        
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Sean Lewis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

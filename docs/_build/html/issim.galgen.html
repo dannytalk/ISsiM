@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>issim.galgen package &mdash; ISsiM 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="setup module" href="setup.html" />
+    <link rel="prev" title="issim package" href="issim.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ISsiM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">ISsiM</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="issim.html">issim package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="issim.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">issim.galgen package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="issim.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="issim.html#module-issim.issim">issim.issim module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="issim.html#module-issim">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="setup.html">setup module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ISsiM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">ISsiM</a></li>
+          <li class="breadcrumb-item"><a href="issim.html">issim package</a></li>
+      <li class="breadcrumb-item active">issim.galgen package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/issim.galgen.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="issim-galgen-package">
+<h1>issim.galgen package<a class="headerlink" href="#issim-galgen-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-issim.galgen.galgen">
+<span id="issim-galgen-galgen-module"></span><h2>issim.galgen.galgen module<a class="headerlink" href="#module-issim.galgen.galgen" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="issim.galgen.galgen.Galaxy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">issim.galgen.galgen.</span></span><span class="sig-name descname"><span class="pre">Galaxy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaleheight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randvel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.00019160287</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4246</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.3333333333333333</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#Galaxy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.Galaxy" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class for generating the initial conditions for a spiral galaxy, running simulations, and generating animations of those simulations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="issim.galgen.galgen.Galaxy.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation='top'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap=&lt;matplotlib.colors.LinearSegmentedColormap</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s=10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#Galaxy.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.Galaxy.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the galaxy at a specific time.</p>
+<p>Parameters:
+- time: The time at which to plot the galaxy.
+- orientation: The orientation of the plot (‘top’ or ‘side’, default is ‘top’).
+- xlim: The x-axis limits of the plot (default is None).
+- ylim: The y-axis limits of the plot (default is None).
+- cmap: The colormap for density plotting (default is plt.cm.autumn).
+- alpha: The transparency of points (default is 0.25).
+- s: The size of points (default is 10).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="issim.galgen.galgen.Galaxy.plotvid">
+<span class="sig-name descname"><span class="pre">plotvid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">downsampling=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation='top'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap=&lt;matplotlib.colors.LinearSegmentedColormap</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s=10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#Galaxy.plotvid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.Galaxy.plotvid" title="Permalink to this definition"></a></dt>
+<dd><p>Create a video of the galaxy’s movement.</p>
+<p>Parameters:
+- downsampling: The downsampling factor for the video (default is 1).
+- orientation: The orientation of the plot (‘top’ or ‘side’, default is ‘top’).
+- xlim: The x-axis limits of the plot (default is None).
+- ylim: The y-axis limits of the plot (default is None).
+- cmap: The colormap for density plotting (default is plt.cm.autumn).
+- alpha: The transparency of points (default is 0.25).
+- s: The size of points (default is 10).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="issim.galgen.galgen.Galaxy.quadplot">
+<span class="sig-name descname"><span class="pre">quadplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim1=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim1=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim2=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim2=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim3=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim3=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim4=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim4=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap=&lt;matplotlib.colors.LinearSegmentedColormap</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s=10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#Galaxy.quadplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.Galaxy.quadplot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the galaxy in four different orientations at a specific time.</p>
+<p>Parameters:
+- time: The time at which to plot the galaxy.
+- xlim1, ylim1: The x-axis and y-axis limits for the first subplot (default is None).
+- xlim2, ylim2: The x-axis and y-axis limits for the second subplot (default is None).
+- xlim3, ylim3: The x-axis and y-axis limits for the third subplot (default is None).
+- xlim4, ylim4: The x-axis and y-axis limits for the fourth subplot (default is None).
+- cmap: The colormap for density plotting (default is plt.cm.autumn).
+- alpha: The transparency of points (default is 0.25).
+- s: The size of points (default is 10).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="issim.galgen.galgen.Galaxy.quadplotvid">
+<span class="sig-name descname"><span class="pre">quadplotvid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">downsampling=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim1=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim1=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim2=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim2=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim3=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim3=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim4=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim4=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap=&lt;matplotlib.colors.LinearSegmentedColormap</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s=10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#Galaxy.quadplotvid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.Galaxy.quadplotvid" title="Permalink to this definition"></a></dt>
+<dd><p>Create a quad-view video of the galaxy’s movement.</p>
+<p>Parameters:
+- downsampling: The downsampling factor for the video (default is 1).
+- orientation: The orientation of the plot (‘top’ or ‘side’, default is ‘top’).
+- xlim1, ylim1: The x-axis and y-axis limits for the first subplot (default is None).
+- xlim2, ylim2: The x-axis and y-axis limits for the second subplot (default is None).
+- xlim3, ylim3: The x-axis and y-axis limits for the third subplot (default is None).
+- xlim4, ylim4: The x-axis and y-axis limits for the fourth subplot (default is None).
+- cmap: The colormap for density plotting (default is plt.cm.autumn).
+- alpha: The transparency of points (default is 0.25).
+- s: The size of points (default is 10).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="issim.galgen.galgen.Galaxy.regenerate">
+<span class="sig-name descname"><span class="pre">regenerate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#Galaxy.regenerate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.Galaxy.regenerate" title="Permalink to this definition"></a></dt>
+<dd><p>Regenerate the galaxy with the same parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="issim.galgen.galgen.Galaxy.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothinglength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tEnd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tStart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#Galaxy.simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.Galaxy.simulate" title="Permalink to this definition"></a></dt>
+<dd><p>Simulate the movement of particles in the galaxy.</p>
+<p>Parameters:
+- smoothinglength: The smoothing length for SPH calculations.
+- tstep: The time step for integration.
+- tEnd: The end time of the simulation.
+- tStart: The start time of the simulation (default is 0).</p>
+<p>Returns:
+- simulation: A tuple containing positions, colors, and times of the simulation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="issim.galgen.galgen.exponentialdiskvelocity">
+<span class="sig-prename descclassname"><span class="pre">issim.galgen.galgen.</span></span><span class="sig-name descname"><span class="pre">exponentialdiskvelocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Rdisk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#exponentialdiskvelocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.exponentialdiskvelocity" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the angular velocity of an object at a certain radial distance 
+within an exponential disk galaxy using a simplified model. This function 
+assumes an exponential disk mass distribution and utilizes specific Bessel 
+functions to estimate the velocity.</p>
+<p>Parameters:
+- G (float): Gravitational constant. Ensure consistent units are used</p>
+<blockquote>
+<div><p>throughout all parameters.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>M (float): Total mass of the galaxy or the mass enclosed within a certain</dt><dd><p>radius. Again, consistent units with G are essential.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Rdisk (float): Scale length of the galaxy’s exponential disk. This parameter</dt><dd><p>defines how rapidly the disk’s density decreases with radius
+from the center of the galaxy.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>R (float or array_like): Radial distance(s) from the center of the galaxy </dt><dd><p>at which to calculate the angular velocity. Can be
+a single value or an array of values for calculating
+velocities at multiple radii simultaneously.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Returns:
+- vels (float or ndarray): The angular velocity (or velocities if R is an array)</p>
+<blockquote>
+<div><p>at the specified radial distance(s) from the galaxy’s 
+center. The return type matches the input type of R.</p>
+</div></blockquote>
+<p>Notes:
+- This function uses the special.iv (modified Bessel function of the first kind)</p>
+<blockquote>
+<div><p>and special.kv (modified Bessel function of the second kind) from the SciPy
+library to compute the velocities. Ensure SciPy is installed and imported
+correctly in your environment.</p>
+</div></blockquote>
+<p>Example:
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">import</span> <span class="pre">numpy</span> <span class="pre">as</span> <span class="pre">np</span>
+<span class="pre">from</span> <span class="pre">scipy</span> <span class="pre">import</span> <span class="pre">special</span>
+<span class="pre">G</span> <span class="pre">=</span> <span class="pre">6.67430e-11</span>&#160; <span class="pre">#</span> <span class="pre">Gravitational</span> <span class="pre">constant</span> <span class="pre">in</span> <span class="pre">m^3</span> <span class="pre">kg^-1</span> <span class="pre">s^-2</span>
+<span class="pre">M</span> <span class="pre">=</span> <span class="pre">1e11</span>&#160; <span class="pre">#</span> <span class="pre">Mass</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">galaxy</span> <span class="pre">in</span> <span class="pre">kg</span>
+<span class="pre">Rdisk</span> <span class="pre">=</span> <span class="pre">3.5e3</span>&#160; <span class="pre">#</span> <span class="pre">Scale</span> <span class="pre">length</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">galaxy's</span> <span class="pre">disk</span> <span class="pre">in</span> <span class="pre">light-years</span>
+<span class="pre">R</span> <span class="pre">=</span> <span class="pre">np.array([8000,</span> <span class="pre">15000])</span>&#160; <span class="pre">#</span> <span class="pre">Radial</span> <span class="pre">distances</span> <span class="pre">in</span> <span class="pre">light-years</span>
+<span class="pre">velocities</span> <span class="pre">=</span> <span class="pre">exponentialdiskvelocity(G,</span> <span class="pre">M,</span> <span class="pre">Rdisk,</span> <span class="pre">R)</span>
+<span class="pre">print(velocities)</span>
+<span class="pre">`</span></code></p>
+<p>The output will be the angular velocities at the specified radial distances.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="issim.galgen.galgen.generate_3d_exponential_cylindrical">
+<span class="sig-prename descclassname"><span class="pre">issim.galgen.galgen.</span></span><span class="sig-name descname"><span class="pre">generate_3d_exponential_cylindrical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#generate_3d_exponential_cylindrical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.generate_3d_exponential_cylindrical" title="Permalink to this definition"></a></dt>
+<dd><p>Generate 3D coordinates in cylindrical space where the radial distance follows
+a radial exponential distribution and z-coordinates are uniformly distributed.</p>
+<p>Parameters:
+- n: Number of points to generate.
+- lambda_r: Rate parameter (λ) for the radial distance’s exponential distribution.
+- z_min: Minimum z-coordinate.
+- z_max: Maximum z-coordinate.</p>
+<p>Returns:
+- A numpy array of shape (n, 3) containing the 3D coordinates.</p>
+<p>Example:
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; from your_module import generate_3d_exponential_cylindrical</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Generating 1000 points with a radius of 2 units and a height of 5 units</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="n">generate_3d_exponential_cylindrical</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Check the shape of the generated points</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1000, 3)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Visualize the generated points in 3D space</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="issim.galgen.galgen.normalize_vectors">
+<span class="sig-prename descclassname"><span class="pre">issim.galgen.galgen.</span></span><span class="sig-name descname"><span class="pre">normalize_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vectors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#normalize_vectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.normalize_vectors" title="Permalink to this definition"></a></dt>
+<dd><p>Normalize a list or array of 3D vectors to their unit vectors.</p>
+<p>Parameters:
+- vectors: A list or a numpy array of shape (n, 3) where n is the number of vectors</p>
+<p>Returns:
+- A numpy array of shape (n, 3) containing the unit vectors.</p>
+<p>Example:
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; from your_module import normalize_vectors</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define some 3D vectors</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Normalize the vectors</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normalized_vectors</span> <span class="o">=</span> <span class="n">normalize_vectors</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Check the normalized vectors</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normalized_vectors</span>
+<span class="go">array([[0.33333333, 0.66666667, 0.66666667],</span>
+<span class="go">       [0.42426407, 0.56568542, 0.70710678],</span>
+<span class="go">       [0.46666667, 0.54772256, 0.6289709 ]])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Check if the magnitudes of the normalized vectors are approximately 1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normalized_vectors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">array([1., 1., 1.])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="issim.galgen.galgen.radiuscalc2Dcylinder">
+<span class="sig-prename descclassname"><span class="pre">issim.galgen.galgen.</span></span><span class="sig-name descname"><span class="pre">radiuscalc2Dcylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vectors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#radiuscalc2Dcylinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.radiuscalc2Dcylinder" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the radial positions of 3D vectors projected onto a 2D cylindrical space.</p>
+<p>Parameters:
+- vectors: A numpy array of shape (n, 3) containing the 3D vectors.</p>
+<p>Returns:
+- A numpy array of shape (n,) containing the radial positions of the vectors in 2D cylindrical space.</p>
+<p>The radial position of a vector in cylindrical coordinates is calculated as the Euclidean distance 
+from the origin to the projection of the vector onto the xy-plane.</p>
+<p>Example:
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; from your_module import radiuscalc2Dcylinder</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define some 3D vectors</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calculate the radial positions of the vectors in 2D cylindrical space</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radial_positions</span> <span class="o">=</span> <span class="n">radiuscalc2Dcylinder</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Check the radial positions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radial_positions</span>
+<span class="go">array([2.23606798, 5.        , 9.21954446])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="issim.galgen.galgen.timepull">
+<span class="sig-prename descclassname"><span class="pre">issim.galgen.galgen.</span></span><span class="sig-name descname"><span class="pre">timepull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/issim/galgen/galgen.html#timepull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#issim.galgen.galgen.timepull" title="Permalink to this definition"></a></dt>
+<dd><p>Find the index of the closest time in a simulation to a given time.</p>
+<p>Parameters:
+- simulation: A tuple containing positions, colors, and times of the simulation.
+- time: The time to find in the simulation.</p>
+<p>Returns:
+- index: The index of the closest time in the simulation.</p>
+</dd></dl>
+
+</section>
+<section id="module-issim.galgen">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-issim.galgen" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="issim.html" class="btn btn-neutral float-left" title="issim package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="setup.html" class="btn btn-neutral float-right" title="setup module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Sean Lewis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

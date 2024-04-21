@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>issim.issim &mdash; issim 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            issim
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">ISsiM</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">issim.issim</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for issim.issim</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
+<span class="kn">import</span> <span class="nn">matplotlib.animation</span> <span class="k">as</span> <span class="nn">animation</span>
+<span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">display</span><span class="p">,</span> <span class="n">clear_output</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="c1">#you need ffmpeg package installed</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;animation.embed_limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">128</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Based on Code from </span>
+
+<span class="sd">Create Your Own Smoothed-Particle-Hydrodynamics Simulation (With Python)</span>
+<span class="sd">Philip Mocz (2020) Princeton Univeristy, @PMocz</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="W"><a class="viewcode-back" href="../../issim.html#issim.issim.W">[docs]</a><span class="k">def</span> <span class="nf">W</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h</span> <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the Gaussian smoothing kernel in three dimensions.</span>
+
+<span class="sd">    This function evaluates the Gaussian smoothing kernel in three dimensions,</span>
+<span class="sd">    which is commonly used in kernel density estimation and smoothing operations.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - x: A  vector or matrix representing the x positions.</span>
+<span class="sd">    - y: A vector or matrix representing the y positions.</span>
+<span class="sd">    - z: A vector or matrix representing the z positions.</span>
+<span class="sd">    - h: The smoothing length or bandwidth of the kernel.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - w: A vector or matrix representing the evaluated smoothing function.</span>
+
+<span class="sd">    The Gaussian smoothing kernel is given by:</span>
+<span class="sd">        w = (1 / (h * sqrt(pi)))^3 * exp(-r^2 / h^2)</span>
+
+<span class="sd">    where:</span>
+<span class="sd">    - r: The Euclidean distance from the origin to the point (x, y, z).</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import W</span>
+
+<span class="sd">    &gt;&gt;&gt; # Define positions and smoothing length</span>
+<span class="sd">    &gt;&gt;&gt; x = np.array([1.0, 2.0, 3.0])</span>
+<span class="sd">    &gt;&gt;&gt; y = np.array([0.5, 1.5, 2.5])</span>
+<span class="sd">    &gt;&gt;&gt; z = np.array([0.2, 1.2, 2.2])</span>
+<span class="sd">    &gt;&gt;&gt; h = 0.5</span>
+
+<span class="sd">    &gt;&gt;&gt; # Compute the Gaussian smoothing kernel</span>
+<span class="sd">    &gt;&gt;&gt; w = W(x, y, z, h)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Check the evaluated smoothing function</span>
+<span class="sd">    &gt;&gt;&gt; w</span>
+<span class="sd">    array([0.00021743, 0.00291502, 0.0238942 ])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+	
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+	
+    <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)))</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+	
+    <span class="k">return</span> <span class="n">w</span></div>
+	
+	
+<div class="viewcode-block" id="gradW"><a class="viewcode-back" href="../../issim.html#issim.issim.gradW">[docs]</a><span class="k">def</span> <span class="nf">gradW</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h</span> <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the gradient of the Gaussian smoothing kernel in three dimensions.</span>
+
+<span class="sd">    This function computes the gradient of the Gaussian smoothing kernel in three dimensions,</span>
+<span class="sd">    which is commonly used in smoothed particle hydrodynamics (SPH) simulations.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - x: A vector or matrix representing the x positions.</span>
+<span class="sd">    - y: A vector or matrix representing the y positions.</span>
+<span class="sd">    - z: A vector or matrix representing the z positions.</span>
+<span class="sd">    - h: The smoothing length or bandwidth of the kernel.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - wx: A vector or matrix representing the x-component of the evaluated gradient.</span>
+<span class="sd">    - wy: A vector or matrix representing the y-component of the evaluated gradient.</span>
+<span class="sd">    - wz: A vector or matrix representing the z-component of the evaluated gradient.</span>
+
+<span class="sd">    The gradient of the Gaussian smoothing kernel is given by:</span>
+<span class="sd">        wx = n * x</span>
+<span class="sd">        wy = n * y</span>
+<span class="sd">        wz = n * z</span>
+
+<span class="sd">    where:</span>
+<span class="sd">    - r: The Euclidean distance from the origin to the point (x, y, z).</span>
+<span class="sd">    - n: The precomputed coefficient for the gradient, computed as -2 * exp(-r^2 / h^2) / h^5 / sqrt(pi)^3.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import gradW</span>
+
+<span class="sd">    &gt;&gt;&gt; # Define positions and smoothing length</span>
+<span class="sd">    &gt;&gt;&gt; x = np.array([1.0, 2.0, 3.0])</span>
+<span class="sd">    &gt;&gt;&gt; y = np.array([0.5, 1.5, 2.5])</span>
+<span class="sd">    &gt;&gt;&gt; z = np.array([0.2, 1.2, 2.2])</span>
+<span class="sd">    &gt;&gt;&gt; h = 0.5</span>
+
+<span class="sd">    &gt;&gt;&gt; # Compute the gradient of the Gaussian smoothing kernel</span>
+<span class="sd">    &gt;&gt;&gt; wx, wy, wz = gradW(x, y, z, h)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Check the evaluated gradient components</span>
+<span class="sd">    &gt;&gt;&gt; wx, wy, wz</span>
+<span class="sd">    (array([-0.00010871, -0.00043583, -0.00097912]),</span>
+<span class="sd">     array([-5.43535809e-05, -2.17414324e-04, -4.88957328e-04]),</span>
+<span class="sd">     array([-2.17414324e-05, -8.69657295e-05, -1.95622816e-04]))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+	
+    <span class="n">n</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">5</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">wx</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">x</span>
+    <span class="n">wy</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">y</span>
+    <span class="n">wz</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">z</span>
+	
+    <span class="k">return</span> <span class="n">wx</span><span class="p">,</span> <span class="n">wy</span><span class="p">,</span> <span class="n">wz</span></div>
+	
+	
+<div class="viewcode-block" id="getPairwiseSeparations"><a class="viewcode-back" href="../../issim.html#issim.issim.getPairwiseSeparations">[docs]</a><span class="k">def</span> <span class="nf">getPairwiseSeparations</span><span class="p">(</span> <span class="n">ri</span><span class="p">,</span> <span class="n">rj</span> <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate pairwise separations between two sets of coordinates.</span>
+
+<span class="sd">    This function computes the pairwise separations between two sets of coordinates,</span>
+<span class="sd">    representing the distances between each point in the first set (ri) and each point</span>
+<span class="sd">    in the second set (rj).</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - ri: An M x 3 matrix of positions for the first set of coordinates.</span>
+<span class="sd">    - rj: An N x 3 matrix of positions for the second set of coordinates.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - dx: An M x N matrix of separations along the x-axis.</span>
+<span class="sd">    - dy: An M x N matrix of separations along the y-axis.</span>
+<span class="sd">    - dz: An M x N matrix of separations along the z-axis.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import getPairwiseSeparations</span>
+
+<span class="sd">    &gt;&gt;&gt; # Define two sets of coordinates</span>
+<span class="sd">    &gt;&gt;&gt; ri = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])</span>
+<span class="sd">    &gt;&gt;&gt; rj = np.array([[0.5, 1.5, 2.5], [3.0, 4.0, 5.0], [6.0, 7.0, 8.0]])</span>
+
+<span class="sd">    &gt;&gt;&gt; # Calculate pairwise separations</span>
+<span class="sd">    &gt;&gt;&gt; dx, dy, dz = getPairwiseSeparations(ri, rj)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Check the calculated separations</span>
+<span class="sd">    &gt;&gt;&gt; dx</span>
+<span class="sd">    array([[ 0.5, -2.5, -5.5],</span>
+<span class="sd">           [ 3. ,  1. , -2. ],</span>
+<span class="sd">           [ 6. ,  4. ,  1. ]])</span>
+
+<span class="sd">    &gt;&gt;&gt; dy</span>
+<span class="sd">    array([[ 0., -1., -2.],</span>
+<span class="sd">           [ 1.,  0., -1.],</span>
+<span class="sd">           [ 2.,  1.,  0.]])</span>
+
+<span class="sd">    &gt;&gt;&gt; dz</span>
+<span class="sd">    array([[ 0., -1., -2.],</span>
+<span class="sd">           [ 1.,  0., -1.],</span>
+<span class="sd">           [ 2.,  1.,  0.]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+	
+    <span class="n">M</span> <span class="o">=</span> <span class="n">ri</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">rj</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+	
+    <span class="c1"># positions ri = (x,y,z)</span>
+    <span class="n">rix</span> <span class="o">=</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">riy</span> <span class="o">=</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">riz</span> <span class="o">=</span> <span class="n">ri</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+	
+    <span class="c1"># other set of points positions rj = (x,y,z)</span>
+    <span class="n">rjx</span> <span class="o">=</span> <span class="n">rj</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">rjy</span> <span class="o">=</span> <span class="n">rj</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">rjz</span> <span class="o">=</span> <span class="n">rj</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+	
+    <span class="c1"># matrices that store all pairwise particle separations: r_i - r_j</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">rix</span> <span class="o">-</span> <span class="n">rjx</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="n">riy</span> <span class="o">-</span> <span class="n">rjy</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">dz</span> <span class="o">=</span> <span class="n">riz</span> <span class="o">-</span> <span class="n">rjz</span><span class="o">.</span><span class="n">T</span>
+	
+    <span class="k">return</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span></div>
+	
+
+<div class="viewcode-block" id="getDensity"><a class="viewcode-back" href="../../issim.html#issim.issim.getDensity">[docs]</a><span class="k">def</span> <span class="nf">getDensity</span><span class="p">(</span> <span class="n">r</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span> <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate density at sampling locations from smoothed particle hydrodynamics (SPH) particle distribution.</span>
+
+<span class="sd">    This function computes the density at sampling locations based on the smoothed particle hydrodynamics (SPH)</span>
+<span class="sd">    particle distribution. It utilizes the SPH density estimation method, where the density at a given location</span>
+<span class="sd">    is computed by summing the contributions from neighboring particles using a smoothing kernel.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - r: An M x 3 matrix of sampling locations.</span>
+<span class="sd">    - pos: An N x 3 matrix of SPH particle positions.</span>
+<span class="sd">    - m: The mass of each SPH particle.</span>
+<span class="sd">    - h: The smoothing length or bandwidth of the kernel.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - rho: An M x 1 vector of densities corresponding to the sampling locations.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import getDensity</span>
+
+<span class="sd">    &gt;&gt;&gt; # Define sampling locations, SPH particle positions, particle mass, and smoothing length</span>
+<span class="sd">    &gt;&gt;&gt; r = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])</span>
+<span class="sd">    &gt;&gt;&gt; pos = np.array([[0.5, 1.5, 2.5], [3.0, 4.0, 5.0], [6.0, 7.0, 8.0]])</span>
+<span class="sd">    &gt;&gt;&gt; m = 0.1</span>
+<span class="sd">    &gt;&gt;&gt; h = 0.5</span>
+
+<span class="sd">    &gt;&gt;&gt; # Calculate density at sampling locations using SPH method</span>
+<span class="sd">    &gt;&gt;&gt; rho = getDensity(r, pos, m, h)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Check the calculated densities</span>
+<span class="sd">    &gt;&gt;&gt; rho</span>
+<span class="sd">    array([[0.05631997],</span>
+<span class="sd">           [0.18138118]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">M</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+	
+    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">getPairwiseSeparations</span><span class="p">(</span> <span class="n">r</span><span class="p">,</span> <span class="n">pos</span> <span class="p">);</span>
+
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">m</span> <span class="o">*</span> <span class="n">W</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="mi">1</span> <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> 
+
+    <span class="k">return</span> <span class="n">rho</span></div>
+	
+	
+<div class="viewcode-block" id="getPressure"><a class="viewcode-back" href="../../issim.html#issim.issim.getPressure">[docs]</a><span class="k">def</span> <span class="nf">getPressure</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the pressure using the polytropic equation of state.</span>
+
+<span class="sd">    This function computes the pressure of a substance using the polytropic equation of state,</span>
+<span class="sd">    which relates pressure (P) to density (rho) according to the formula P = k * rho^(1 + 1/n),</span>
+<span class="sd">    where:</span>
+<span class="sd">    - rho: A vector of densities.</span>
+<span class="sd">    - k: The equation of state constant.</span>
+<span class="sd">    - n: The polytropic index.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - rho: A numpy array or scalar representing the density or densities of the substance(s).</span>
+<span class="sd">    - k: A scalar representing the equation of state constant.</span>
+<span class="sd">    - n: A scalar representing the polytropic index.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - P: A numpy array or scalar representing the pressure(s) calculated using the polytropic equation.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import getPressure</span>
+
+<span class="sd">    &gt;&gt;&gt; # Define densities, equation of state constant, and polytropic index</span>
+<span class="sd">    &gt;&gt;&gt; rho = np.array([1.0, 2.0, 3.0])</span>
+<span class="sd">    &gt;&gt;&gt; k = 1.5</span>
+<span class="sd">    &gt;&gt;&gt; n = 1.2</span>
+
+<span class="sd">    &gt;&gt;&gt; # Calculate the pressure using the polytropic equation of state</span>
+<span class="sd">    &gt;&gt;&gt; pressure = getPressure(rho, k, n)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Check the calculated pressures</span>
+<span class="sd">    &gt;&gt;&gt; pressure</span>
+<span class="sd">    array([1.5       , 4.29118668, 8.68395323])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+	
+    <span class="n">P</span> <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="n">rho</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="n">n</span><span class="p">)</span>
+	
+    <span class="k">return</span> <span class="n">P</span></div>
+
+<div class="viewcode-block" id="arbacalc3d_vectorized"><a class="viewcode-back" href="../../issim.html#issim.issim.arbacalc3d_vectorized">[docs]</a><span class="k">def</span> <span class="nf">arbacalc3d_vectorized</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">masses</span><span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the accelerations of objects due to gravity in a 3D space.</span>
+
+<span class="sd">    This function calculates the accelerations of multiple objects in a gravitational field.</span>
+<span class="sd">    The calculation is performed in a vectorized manner, leveraging NumPy broadcasting</span>
+<span class="sd">    and array operations for efficiency.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - G: Gravitational constant.</span>
+<span class="sd">    - positions: A numpy array of shape (n_objects, 3) containing the positions of the objects</span>
+<span class="sd">                 in 3D space, where each row represents the (x, y, z) coordinates of an object.</span>
+<span class="sd">    - masses: A numpy array of shape (n_objects,) containing the masses of the objects.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - A numpy array of shape (n_objects, 3) containing the accelerations of the objects</span>
+<span class="sd">      in 3D space, where each row represents the (x, y, z) components of acceleration</span>
+<span class="sd">      for an object.</span>
+
+<span class="sd">    Details:</span>
+<span class="sd">    - The function first computes the pairwise differences in positions between all objects</span>
+<span class="sd">      to obtain the distance vectors.</span>
+<span class="sd">    - It then calculates the distances between all pairs of objects using the Euclidean norm.</span>
+<span class="sd">    - To avoid division by zero for the same object (resulting in infinite acceleration),</span>
+<span class="sd">      the function sets the distances between an object and itself to np.inf.</span>
+<span class="sd">    - Next, it computes the acceleration due to gravity for each pair of objects using</span>
+<span class="sd">      Newton&#39;s law of universal gravitation.</span>
+<span class="sd">    - Finally, it sums the contributions from all other masses to obtain the total acceleration</span>
+<span class="sd">      acting on each object, excluding the self-contribution.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import arbacalc3d_vectorized</span>
+
+<span class="sd">    &gt;&gt;&gt; # Define gravitational constant and object positions and masses</span>
+<span class="sd">    &gt;&gt;&gt; G = 6.67430e-11</span>
+<span class="sd">    &gt;&gt;&gt; positions = np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]])</span>
+<span class="sd">    &gt;&gt;&gt; masses = np.array([10, 20, 30])</span>
+
+<span class="sd">    &gt;&gt;&gt; # Compute accelerations due to gravity</span>
+<span class="sd">    &gt;&gt;&gt; accelerations = arbacalc3d_vectorized(G, positions, masses)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Check the calculated accelerations</span>
+<span class="sd">    &gt;&gt;&gt; accelerations</span>
+<span class="sd">    array([[ 0.        ,  0.        ,  0.        ],</span>
+<span class="sd">           [-1.33110506, -1.33110506, -1.33110506],</span>
+<span class="sd">           [-0.60981822, -0.60981822, -0.60981822]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        
+    <span class="n">n_objects</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">masses</span><span class="p">)</span>
+    <span class="n">accels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_objects</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    
+    <span class="c1"># Expand dimensions to support broadcasting for pairwise subtraction</span>
+    <span class="n">pos_expanded</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># Shape: (n_objects, 1, 2)</span>
+    <span class="n">masses_expanded</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>  <span class="c1"># Shape: (n_objects, 1)</span>
+    
+    <span class="c1"># Compute pairwise differences in positions and distances</span>
+    <span class="n">delta_pos</span> <span class="o">=</span> <span class="n">pos_expanded</span> <span class="o">-</span> <span class="n">positions</span>  <span class="c1"># Shape: (n_objects, n_objects, 2)</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">delta_pos</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># Shape: (n_objects, n_objects)</span>
+    
+    <span class="c1"># Avoid division by zero for the same object by setting distance to np.inf</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+    
+    <span class="c1"># Compute the acceleration due to gravity</span>
+    <span class="c1"># Add an axis to distances to support broadcasting in division</span>
+    <span class="n">acc_due_to_gravity</span> <span class="o">=</span> <span class="o">-</span><span class="n">G</span> <span class="o">*</span> <span class="n">delta_pos</span> <span class="o">*</span> <span class="n">masses_expanded</span> <span class="o">/</span> <span class="n">distances</span><span class="p">[:,:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span>  <span class="c1"># Shape: (n_objects, n_objects, 2)</span>
+    
+    <span class="c1"># Sum the contributions from all other masses, ignoring the diagonal (self-contribution)</span>
+    <span class="n">accels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">acc_due_to_gravity</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">accels</span></div>
+
+
+<div class="viewcode-block" id="getAcc"><a class="viewcode-back" href="../../issim.html#issim.issim.getAcc">[docs]</a><span class="k">def</span> <span class="nf">getAcc</span><span class="p">(</span> <span class="n">pos</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">G</span> <span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the acceleration on each smoothed particle hydrodynamics (SPH) particle.</span>
+
+<span class="sd">    This function computes the acceleration on each SPH particle in a simulation. It uses</span>
+<span class="sd">    SPH techniques to calculate the pressure forces, gravitational forces, and viscosity forces</span>
+<span class="sd">    acting on the particles.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - pos: An N x 3 matrix of positions for the SPH particles.</span>
+<span class="sd">    - vel: An N x 3 matrix of velocities for the SPH particles.</span>
+<span class="sd">    - m: The mass of each SPH particle.</span>
+<span class="sd">    - h: The smoothing length or bandwidth of the kernel.</span>
+<span class="sd">    - k: The equation of state constant.</span>
+<span class="sd">    - n: The polytropic index.</span>
+<span class="sd">    - nu: The viscosity coefficient.</span>
+<span class="sd">    - G: The gravitational constant.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - a: An N x 3 matrix of accelerations for each SPH particle.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import getAcc</span>
+
+<span class="sd">    &gt;&gt;&gt; # Define positions, velocities, masses, smoothing length, equation of state parameters, viscosity, and gravity constant</span>
+<span class="sd">    &gt;&gt;&gt; pos = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])</span>
+<span class="sd">    &gt;&gt;&gt; vel = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])</span>
+<span class="sd">    &gt;&gt;&gt; m = 0.1</span>
+<span class="sd">    &gt;&gt;&gt; h = 0.5</span>
+<span class="sd">    &gt;&gt;&gt; k = 1.0</span>
+<span class="sd">    &gt;&gt;&gt; n = 1.5</span>
+<span class="sd">    &gt;&gt;&gt; nu = 0.01</span>
+<span class="sd">    &gt;&gt;&gt; G = 9.81</span>
+
+<span class="sd">    &gt;&gt;&gt; # Calculate accelerations using SPH method</span>
+<span class="sd">    &gt;&gt;&gt; a = getAcc(pos, vel, m, h, k, n, nu, G)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Check the calculated accelerations</span>
+<span class="sd">    &gt;&gt;&gt; a</span>
+<span class="sd">    array([[-0.01617059, -0.03234117, -0.04851176],</span>
+<span class="sd">           [-0.05834951, -0.07312689, -0.08790426]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+	
+	<span class="c1"># Calculate densities at the position of the particles</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">getDensity</span><span class="p">(</span> <span class="n">pos</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span> <span class="p">)</span>
+	
+	<span class="c1"># Get the pressures</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">getPressure</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+	<span class="c1"># Get pairwise distances and gradients</span>
+    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">getPairwiseSeparations</span><span class="p">(</span> <span class="n">pos</span><span class="p">,</span> <span class="n">pos</span> <span class="p">)</span>
+    <span class="n">dWx</span><span class="p">,</span> <span class="n">dWy</span><span class="p">,</span> <span class="n">dWz</span> <span class="o">=</span> <span class="n">gradW</span><span class="p">(</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">h</span> <span class="p">)</span>
+	
+	<span class="c1"># Add Pressure contribution to accelerations</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">m</span> <span class="o">*</span> <span class="p">(</span> <span class="n">P</span><span class="o">/</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">P</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">rho</span><span class="o">.</span><span class="n">T</span><span class="o">**</span><span class="mi">2</span>  <span class="p">)</span> <span class="o">*</span> <span class="n">dWx</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">ay</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">m</span> <span class="o">*</span> <span class="p">(</span> <span class="n">P</span><span class="o">/</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">P</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">rho</span><span class="o">.</span><span class="n">T</span><span class="o">**</span><span class="mi">2</span>  <span class="p">)</span> <span class="o">*</span> <span class="n">dWy</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">az</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">m</span> <span class="o">*</span> <span class="p">(</span> <span class="n">P</span><span class="o">/</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">P</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">rho</span><span class="o">.</span><span class="n">T</span><span class="o">**</span><span class="mi">2</span>  <span class="p">)</span> <span class="o">*</span> <span class="n">dWz</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+	
+	<span class="c1"># pack together the acceleration components</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">ax</span><span class="p">,</span><span class="n">ay</span><span class="p">,</span><span class="n">az</span><span class="p">))</span>
+	
+	<span class="c1"># Add external potential force</span>
+    <span class="n">a</span> <span class="o">+=</span> <span class="n">arbacalc3d_vectorized</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">m</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">))))</span>
+	
+	<span class="c1"># Add viscosity</span>
+    <span class="n">a</span> <span class="o">-=</span> <span class="n">nu</span> <span class="o">*</span> <span class="n">vel</span>
+    <span class="k">return</span> <span class="n">a</span></div>
+
+<div class="viewcode-block" id="simulate"><a class="viewcode-back" href="../../issim.html#issim.issim.simulate">[docs]</a><span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">tEnd</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">masses</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">plotRealTime</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">tStart</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="n">n</span> <span class="o">=</span> <span class="mi">4</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="n">simradius</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulate the movement of particles in a smoothed particle hydrodynamics (SPH) N-Body system using leapfrog integration.</span>
+
+<span class="sd">    This function performs a simulation of the movement of particles in an SPH N-Body system. It uses leapfrog integration</span>
+<span class="sd">    techniques to update the positions and velocities of the particles over time. The simulation can optionally graph the</span>
+<span class="sd">    particles in real-time.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - N: The number of particles in the system.</span>
+<span class="sd">    - tstep: The time step for integration.</span>
+<span class="sd">    - tEnd: The end time of the simulation.</span>
+<span class="sd">    - pos: An N x 3 matrix of initial positions for the particles.</span>
+<span class="sd">    - vel: An N x 3 matrix of initial velocities for the particles.</span>
+<span class="sd">    - masses: An array of length N containing the masses of the particles.</span>
+<span class="sd">    - h: The smoothing length or bandwidth of the kernel.</span>
+<span class="sd">    - k: The equation of state constant.</span>
+<span class="sd">    - nu: The viscosity coefficient.</span>
+<span class="sd">    - G: The gravitational constant.</span>
+<span class="sd">    - plotRealTime: A boolean indicating whether to plot the particles in real-time (default is True).</span>
+<span class="sd">    - tStart: The start time of the simulation (default is 0).</span>
+<span class="sd">    - n: The polytropic index (default is 4/3).</span>
+<span class="sd">    - simradius: The radius of the simulation region (default is 1).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - positions: A 3D array of shape (Nt, N, 3) containing the positions of the particles at each time step.</span>
+<span class="sd">    - colors: A 2D array of shape (Nt, N) containing the color values for density plotting at each time step.</span>
+<span class="sd">    - times: A 1D array of length Nt containing the time values at each time step.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from your_module import simulate</span>
+
+<span class="sd">    &gt;&gt;&gt; # Define simulation parameters and initial conditions</span>
+<span class="sd">    &gt;&gt;&gt; N = 100</span>
+<span class="sd">    &gt;&gt;&gt; tstep = 0.01</span>
+<span class="sd">    &gt;&gt;&gt; tEnd = 10</span>
+<span class="sd">    &gt;&gt;&gt; pos = np.random.rand(N, 3) * 10  # Random initial positions</span>
+<span class="sd">    &gt;&gt;&gt; vel = np.zeros((N, 3))  # Initial velocities</span>
+<span class="sd">    &gt;&gt;&gt; masses = np.ones(N)  # Equal masses for all particles</span>
+<span class="sd">    &gt;&gt;&gt; h = 0.1</span>
+<span class="sd">    &gt;&gt;&gt; k = 1.0</span>
+<span class="sd">    &gt;&gt;&gt; nu = 0.01</span>
+<span class="sd">    &gt;&gt;&gt; G = 9.81</span>
+
+<span class="sd">    &gt;&gt;&gt; # Perform simulation</span>
+<span class="sd">    &gt;&gt;&gt; positions, colors, times = simulate(N, tstep, tEnd, pos, vel, masses, h, k, nu, G)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Plot the positions of the particles over time</span>
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; fig = plt.figure()</span>
+<span class="sd">    &gt;&gt;&gt; ax = fig.add_subplot(111, projection=&#39;3d&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; for i in range(len(positions)):</span>
+<span class="sd">    ...     ax.scatter(positions[i,:,0], positions[i,:,1], positions[i,:,2], c=colors[i], cmap=plt.cm.autumn)</span>
+<span class="sd">    &gt;&gt;&gt; plt.show()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">t</span> <span class="o">=</span> <span class="n">tStart</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">tstep</span>
+    
+    <span class="c1"># calculate initial gravitational accelerations</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">getAcc</span><span class="p">(</span> <span class="n">pos</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">masses</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">G</span> <span class="p">)</span>
+	
+    <span class="c1"># number of timesteps</span>
+    <span class="n">Nt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">tEnd</span><span class="o">/</span><span class="n">tstep</span><span class="p">))</span>
+
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">Nt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">Nt</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">Nt</span><span class="p">)</span>
+    <span class="n">notstars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> 
+
+    <span class="c1"># prep figure</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">ax4</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+	
+    <span class="c1"># Simulation Main Loop</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">Nt</span><span class="p">)):</span>
+		<span class="c1"># (1/2) kick</span>
+        <span class="n">vel</span> <span class="o">+=</span> <span class="n">acc</span> <span class="o">*</span> <span class="n">dt</span><span class="o">/</span><span class="mi">2</span>
+		
+		<span class="c1"># drift</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">dt</span>
+		
+		<span class="c1"># update accelerations</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">getAcc</span><span class="p">(</span> <span class="n">pos</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">masses</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">G</span> <span class="p">)</span>
+		
+		<span class="c1"># (1/2) kick</span>
+        <span class="n">vel</span> <span class="o">+=</span> <span class="n">acc</span> <span class="o">*</span> <span class="n">dt</span><span class="o">/</span><span class="mi">2</span>
+		
+		<span class="c1"># update time</span>
+        <span class="n">t</span> <span class="o">+=</span> <span class="n">dt</span>
+		
+		<span class="c1"># get density for plotting</span>
+        <span class="n">rho</span> <span class="o">=</span> <span class="n">getDensity</span><span class="p">(</span> <span class="n">pos</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">masses</span><span class="p">,</span> <span class="n">h</span> <span class="p">)</span>
+
+        <span class="c1">#figure out if gas has become star forming matter (False if matter is star forming) </span>
+        <span class="n">newstar</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="c1">################################ USING A TEST VALUE change 10 t0 an actual variable #######################################################</span>
+        <span class="n">notstars</span> <span class="o">=</span> <span class="n">notstars</span> <span class="o">*</span> <span class="n">newstar</span><span class="o">.</span><span class="n">T</span>
+        
+        <span class="c1">#colors for density plotting </span>
+        <span class="n">cval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">((</span><span class="n">rho</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+		
+		<span class="c1"># plot in real time</span>
+        <span class="k">if</span> <span class="n">plotRealTime</span> <span class="ow">or</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">Nt</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+
+            <span class="n">clear_output</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">ax1</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">pos</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">pos</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">cval</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">autumn</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">4.5</span> <span class="o">*</span> <span class="n">simradius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span> <span class="n">simradius</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="n">simradius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="n">simradius</span><span class="p">))</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">ax2</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">pos</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">pos</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">cval</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">autumn</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="n">simradius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="n">simradius</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">4.5</span><span class="o">*</span><span class="n">simradius</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="n">simradius</span><span class="p">))</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span> 
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">ax3</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">pos</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">pos</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">cval</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">autumn</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">simradius</span><span class="p">,</span> <span class="n">simradius</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">simradius</span><span class="p">,</span> <span class="n">simradius</span><span class="p">))</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">ax4</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+            <span class="n">cval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">((</span><span class="n">rho</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">pos</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">pos</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">cval</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">autumn</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="o">*</span><span class="n">simradius</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">simradius</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="o">*</span><span class="n">simradius</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">simradius</span><span class="p">))</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="n">ax4</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="mf">.1</span><span class="p">))</span> 
+
+            
+            
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">)</span>
+
+        <span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cval</span>
+        <span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+	
+	<span class="c1"># Save figure</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+	    
+    <span class="k">return</span> <span class="n">positions</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">times</span>  </div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Sean Lewis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
