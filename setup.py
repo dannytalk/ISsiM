@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
      name="issim",
-     version="0.1",
+     version="0.1.0",
      author="Sean Lewis",
      author_email="sean.lewis@yale.edu",
      description="A Python package for simulating ISM in galaxies",
