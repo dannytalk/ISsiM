@@ -33,7 +33,8 @@ randvel = 0.0004 #random velocity
 plotRealTime = True # switch on for plotting as the simulation goes along
 
 np.random.seed(42)     
-gal1 = issim.galgen.Galaxy(N, mass = M, radius = R, scaleheight = scaleheight, randvel = randvel,G = G,  k = k , n = n, nu = nu)
+gal1 = issim.galgen.Galaxy(N, mass = M, radius = R, scaleheight = scaleheight,
+randvel = randvel,G = G,  k = k , n = n, nu = nu)
 simulation = gal1.simulate(smoothinglength = 0.04, tstep = 1, tEnd = tEnd)
 
 ```
