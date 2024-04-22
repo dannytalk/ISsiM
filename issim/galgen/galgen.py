@@ -3,6 +3,7 @@ from astropy import units as u
 import matplotlib.pyplot as plt
 import scipy.special as special
 import matplotlib.animation as animation
+import os
 from matplotlib.animation import FuncAnimation
 from IPython.display import HTML, display, clear_output
 from tqdm import tqdm
@@ -218,7 +219,7 @@ class Galaxy():
     '''
     A class for generating the initial conditions for a spiral galaxy, running simulations, and generating animations of those simulations. 
     '''
-    def __init__(self, N, mass, radius, scaleheight, randvel,G =0.00019160287,  k = 0.4246 , n = 4/3, nu = 0.1):
+    def __init__(self, N, mass, radius, scaleheight, randvel,G =0.00019160287,  k = 0.000004 , n = 3, nu = 0.000003):
         """
         Initialize a Galaxy object.
 
@@ -229,9 +230,9 @@ class Galaxy():
         - scaleheight: The scale height of the galaxy.
         - randvel: The magnitude of random velocities for the particles.
         - G: The gravitational constant (default is 0.00019160287).
-        - k: The equation of state constant (default is 0.4246).
-        - n: The polytropic index (default is 4/3).
-        - nu: The viscosity coefficient (default is 0.1).
+        - k: The equation of state constant (default is 0.000004).
+        - n: The polytropic index (default is 3).
+        - nu: The viscosity coefficient (default is 0.000003).
         """
         
         #stored constants 
@@ -244,7 +245,8 @@ class Galaxy():
         self.konstant = k
         self.pindex = n
         self.viscosity = nu
-        self.simulation = None 
+        self.simulation = None
+        self.animation = None  
         #generate the galaxy 
         print('...generating galaxy')
         self.particlemass = self.mass/self.particles * np.ones(self.particles)
@@ -406,7 +408,51 @@ class Galaxy():
         ax4.set_facecolor('black')
         ax4.set_facecolor((.1,.1,.1))
         ax4.scatter(posarr[t][:,0], posarr[t][:,1], c=(colarr[t]), cmap=cmap, s=s, alpha=alpha, **kwargs)
-    def plotvid(self, downsampling=1, orientation = 'top', xlim = None, ylim =None, cmap = plt.cm.autumn, alpha=0.25,  s=10, **kwargs):
+    
+    def plot3d(self, time, xlim = None, ylim =None, zlim = None, cmap = plt.cm.autumn, alpha=0.2,  s=10, **kwargs):
+        """
+        Plot the galaxy at a specific time.
+
+        Parameters:
+        - time: The time at which to plot the galaxy.
+        - orientation: The orientation of the plot ('top' or 'side', default is 'top').
+        - xlim: The x-axis limits of the plot (default is None).
+        - ylim: The y-axis limits of the plot (default is None).
+        - zlim: The y-axis limits of the plot (default is None).
+        - cmap: The colormap for density plotting (default is plt.cm.autumn).
+        - alpha: The transparency of points (default is 0.25).
+        - s: The size of points (default is 10).
+        """
+
+        if self.simulation is None:
+            print('NO SIMULATION HAS BEEN RUN YET')
+            return
+
+        if xlim is None:
+            xlim = (-4.5*self.radius, 4.5*self.radius)
+        if ylim is None:
+            ylim = (-4.5*self.radius, 4.5*self.radius)
+        if zlim is None:
+            zlim = (-4.5*self.radius, 4.5*self.radius)
+            
+        posarr = self.simulation[0]
+        colarr = self.simulation[1]
+        t = timepull(self.simulation, time)
+        print(f'Graphed at time {self.simulation[2][t]}')
+
+        fig = plt.figure()
+ 
+        # syntax for 3-D projection
+        ax = plt.axes(projection ='3d')
+ 
+        ax.set_facecolor('black')
+        ax.set_facecolor((.1,.1,.1))
+        ax.scatter(posarr[t][:,0], posarr[t][:,1], posarr[t][:,2], c=(colarr[t]), cmap=cmap, alpha = alpha , s = s, **kwargs )
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        ax.set_zlim(zlim)
+
+    def plotvid(self, downsampling=1, interval = 50, orientation = 'top', xlim = None, ylim =None, cmap = plt.cm.autumn, alpha=0.25,  s=10, **kwargs):
         """
         Create a video of the galaxy's movement.
 
@@ -419,6 +465,13 @@ class Galaxy():
         - alpha: The transparency of points (default is 0.25).
         - s: The size of points (default is 10).
         """
+
+        if (len(self.simulation[2]) * 0.001 * interval)/downsampling > 40: 
+            print("VIDEO MAY BE TOO LONG: If video doesn't display, increase downsampling")
+        
+        if not (isinstance(downsampling, int) and downsampling > 0):
+            print('DOWNSAMPLING MUST BE AN INTEGER')
+            return
         if self.simulation is None:
             print('NO SIMULATION HAS BEEN RUN YET')
             return
@@ -426,7 +479,37 @@ class Galaxy():
             xlim = (-4.5*self.radius, 4.5*self.radius)
         if ylim is None:
             ylim = (-4.5*self.radius, 4.5*self.radius)
-        print('unfinished')
+        
+        # Downsampling by selecting every nth point
+        posarr = self.simulation[0]
+        colarr = self.simulation[1]
+        
+        positions1 = posarr[::downsampling]
+        colors1 = colarr[::downsampling] 
+
+    
+        def update_plot(i):
+            ax.cla()
+            ax.set_facecolor('black')
+            ax.set_facecolor((.1,.1,.1))
+            if orientation == 'top':
+                plt.scatter(positions1[i][:,0], positions1[i][:,1], c=(colors1[i]), cmap=cmap, alpha = alpha , s = s, **kwargs )
+            elif orientation == 'side':
+                plt.scatter(positions1[i][:,0], positions1[i][:,2], c=(colors1[i]), cmap=cmap, alpha = alpha , s = s, **kwargs )
+            else:
+                print('NOT A VALID VIEWING DIRECTION')
+                return
+            plt.xlim(xlim)
+            plt.ylim(ylim)
+
+        fig, ax = plt.subplots()
+
+        #positions, colors = main()
+        ani = FuncAnimation(fig, update_plot, frames=len(positions1), interval=interval, repeat=False)
+        self.animation = ani
+        display(HTML(ani.to_jshtml()))
+        
+        return ani
     def quadplotvid(self, downsampling=1, xlim1 =None, ylim1 =None, xlim2 = None, ylim2 =None,  xlim3 = None, 
                     ylim3 = None, xlim4 = None, ylim4 = None, cmap = plt.cm.autumn, alpha=0.25,  s=10, **kwargs):
         """
@@ -443,6 +526,11 @@ class Galaxy():
         - alpha: The transparency of points (default is 0.25).
         - s: The size of points (default is 10).
         """
+        if (len(self.simulation[2]) * 0.001 * interval)/downsampling > 40: 
+            print("VIDEO MAY BE TOO LONG: If video doesn't display, increase downsampling")
+        
+        if not (isinstance(downsampling, int) and downsampling > 0):
+            print('DOWNSAMPLING MUST BE AN INTEGER')
         if self.simulation is None:
             print('NO SIMULATION HAS BEEN RUN YET')
             return
@@ -521,10 +609,93 @@ class Galaxy():
 
         #positions, colors = main()
         ani = FuncAnimation(fig, update_plot, frames=len(positions1), interval=50, repeat=False)
-        
+        self.animation = ani
         display(HTML(ani.to_jshtml()))
         
         return ani
+    
+    def plot3dvid(self, downsampling=1,  xlim = None, ylim =None,  zlim =None, interval = 50, cmap = plt.cm.autumn, alpha=0.2,  s=10, **kwargs): 
+        """
+        Create a 3D video of the galaxy's movement.
+
+        Parameters:
+        - downsampling: The downsampling factor for the video (default is 1).
+        - orientation: The orientation of the plot ('top' or 'side', default is 'top').
+        - xlim: The x-axis limits of the plot (default is None).
+        - ylim: The y-axis limits of the plot (default is None).
+        - zlim: The z-axis limits of the plot (default is None).
+        - cmap: The colormap for density plotting (default is plt.cm.autumn).
+        - alpha: The transparency of points (default is 0.25).
+        - s: The size of points (default is 10).
+        """
+
+        if (len(self.simulation[2]) * 0.001 * interval)/downsampling > 40: 
+            print("VIDEO MAY BE TOO LONG: If video doesn't display, increase downsampling")
+        
+        if not (isinstance(downsampling, int) and downsampling > 0):
+            print('DOWNSAMPLING MUST BE AN INTEGER')
+            return
+        if self.simulation is None:
+            print('NO SIMULATION HAS BEEN RUN YET')
+            return
+        if xlim is None:
+            xlim = (-4.5*self.radius, 4.5*self.radius)
+        if ylim is None:
+            ylim = (-4.5*self.radius, 4.5*self.radius)
+        if zlim is None:
+            zlim = (-4.5*self.radius, 4.5*self.radius)
+        
+        # Downsampling by selecting every nth point
+        posarr = self.simulation[0]
+        colarr = self.simulation[1]
+        
+        positions1 = posarr[::downsampling]
+        colors1 = colarr[::downsampling] 
+
+    
+        def update_plot(i):
+            ax.cla()
+            ax.set_facecolor('black')
+            ax.set_facecolor((.1,.1,.1))
+            ax.scatter(positions1[i][:,0], positions1[i][:,1], positions1[i][:,2], c=(colors1[i]), cmap=cmap, alpha = alpha , s = s, **kwargs )
+
+            ax.set_xlim(xlim)
+            ax.set_ylim(ylim)
+            ax.set_zlim(zlim)
+
+
+        fig = plt.figure()
+ 
+        # syntax for 3-D projection
+        ax = plt.axes(projection ='3d')
+
+        #positions, colors = main()
+        ani = FuncAnimation(fig, update_plot, frames=len(positions1), interval=interval, repeat=False)
+        self.animation = ani
+        display(HTML(ani.to_jshtml()))
+        
+        return ani
+    def saveanim(self, name='ISsiManim', writer='ffmpeg', fps=24, dpi=100):
+        """
+        Save the generated animation as an MP4 file.
+
+        Parameters:
+        - name: The base name of the MP4 file (default is 'ISsiManim').
+        - writer: The name of the video writer to use (default is 'ffmpeg').
+        - fps: The frames per second of the animation (default is 24).
+        - dpi: The resolution of the animation in dots per inch (default is 100).
+        """
+        if self.animation == None:
+            print("NO ANIMATION HAS BEEN GENERATED")
+            return
+        filename_base = name
+        filename = f'{filename_base}.mp4'
+        counter = 1
+        while os.path.exists(filename):
+            filename = f'{filename_base}_{counter}.mp4'
+            counter += 1
+        (self.animation).save(filename, writer=writer, fps=fps, dpi=dpi)
+    
 
 
             
