@@ -608,13 +608,13 @@ class Galaxy():
         ax4 = plt.subplot(grid[1,1])
 
         #positions, colors = main()
-        ani = FuncAnimation(fig, update_plot, frames=len(positions1), interval=50, repeat=False)
+        ani = FuncAnimation(fig, update_plot, frames=len(positions1), interval=interval, repeat=False)
         self.animation = ani
         display(HTML(ani.to_jshtml()))
         
         return ani
     
-    def plot3dvid(self, downsampling=1, interval = 50,  xlim = None, ylim =None,  zlim =None, interval = 50, cmap = plt.cm.autumn, alpha=0.2,  s=10, **kwargs): 
+    def plot3dvid(self, downsampling=1, interval = 50,  xlim = None, ylim =None,  zlim =None, cmap = plt.cm.autumn, alpha=0.2,  s=10, **kwargs): 
         """
         Create a 3D video of the galaxy's movement.
 
