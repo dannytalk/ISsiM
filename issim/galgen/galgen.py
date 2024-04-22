@@ -54,7 +54,7 @@ def generate_3d_exponential_cylindrical(n, radius, height):
     Example:
     
     >>> import numpy as np
-    >>> from your_module import generate_3d_exponential_cylindrical
+    >>> from issim.galgen import generate_3d_exponential_cylindrical
     
     >>> # Generating 1000 points with a radius of 2 units and a height of 5 units
     >>> points = generate_3d_exponential_cylindrical(1000, 2, 5)
@@ -157,7 +157,7 @@ def normalize_vectors(vectors):
 
     Example:
     >>> import numpy as np
-    >>> from your_module import normalize_vectors
+    >>> from issim.galgen import normalize_vectors
     
     >>> # Define some 3D vectors
     >>> vectors = np.array([[1, 2, 2], [3, 4, 5], [6, 7, 8]])
@@ -197,7 +197,7 @@ def radiuscalc2Dcylinder(vectors):
 
     Example:
     >>> import numpy as np
-    >>> from your_module import radiuscalc2Dcylinder
+    >>> from issim.galgen import radiuscalc2Dcylinder
     
     >>> # Define some 3D vectors
     >>> vectors = np.array([[1, 2, 2], [3, 4, 5], [6, 7, 8]])
