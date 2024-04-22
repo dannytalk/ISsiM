@@ -210,8 +210,6 @@ def getDensity( r, pos, m, h ):
 
     Example:
     
-    >>>
-    
     >>> import numpy as np
     >>> from issim import getDensity
 
