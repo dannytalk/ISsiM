@@ -44,7 +44,7 @@ def W( x, y, z, h ):
     Example:
     
     >>> import numpy as np
-    >>> from your_module import W
+    >>> from issim import W
 
     >>> # Define positions and smoothing length
     >>> x = np.array([1.0, 2.0, 3.0])
@@ -97,7 +97,7 @@ def gradW( x, y, z, h ):
     Example:
     
     >>> import numpy as np
-    >>> from your_module import gradW
+    >>> from issim import gradW
 
     >>> # Define positions and smoothing length
     >>> x = np.array([1.0, 2.0, 3.0])
@@ -144,7 +144,7 @@ def getPairwiseSeparations( ri, rj ):
     Example:
     
     >>> import numpy as np
-    >>> from your_module import getPairwiseSeparations
+    >>> from issim import getPairwiseSeparations
 
     >>> # Define two sets of coordinates
     >>> ri = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
@@ -213,7 +213,7 @@ def getDensity( r, pos, m, h ):
     >>>
     
     >>> import numpy as np
-    >>> from your_module import getDensity
+    >>> from issim import getDensity
 
     >>> # Define sampling locations, SPH particle positions, particle mass, and smoothing length
     >>> r = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
@@ -261,7 +261,7 @@ def getPressure(rho, k, n):
     Example:
     
     >>> import numpy as np
-    >>> from your_module import getPressure
+    >>> from issim import getPressure
 
     >>> # Define densities, equation of state constant, and polytropic index
     >>> rho = np.array([1.0, 2.0, 3.0])
@@ -307,7 +307,7 @@ def arbacalc3d_vectorized(G, positions, masses):
     Example:
     
     >>> import numpy as np
-    >>> from your_module import arbacalc3d_vectorized
+    >>> from issim import arbacalc3d_vectorized
 
     >>> # Define gravitational constant and object positions and masses
     >>> G = 6.67430e-11
@@ -373,7 +373,7 @@ def getAcc( pos, vel, m, h, k, n, nu, G ):
     Example:
     
     >>> import numpy as np
-    >>> from your_module import getAcc
+    >>> from issim import getAcc
 
     >>> # Define positions, velocities, masses, smoothing length, equation of state parameters, viscosity, and gravity constant
     >>> pos = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
@@ -452,7 +452,7 @@ def simulate(N, tstep, tEnd, pos, vel, masses, h, k, nu, G, plotRealTime = True,
     Example:
     
     >>> import numpy as np
-    >>> from your_module import simulate
+    >>> from issim import simulate
 
     >>> # Define simulation parameters and initial conditions
     >>> N = 100
