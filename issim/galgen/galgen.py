@@ -510,7 +510,7 @@ class Galaxy():
         display(HTML(ani.to_jshtml()))
         
         return ani
-    def quadplotvid(self, downsampling=1, xlim1 =None, ylim1 =None, xlim2 = None, ylim2 =None,  xlim3 = None, 
+    def quadplotvid(self, downsampling=1, interval = 50, xlim1 =None, ylim1 =None, xlim2 = None, ylim2 =None,  xlim3 = None, 
                     ylim3 = None, xlim4 = None, ylim4 = None, cmap = plt.cm.autumn, alpha=0.25,  s=10, **kwargs):
         """
         Create a quad-view video of the galaxy's movement.
@@ -614,7 +614,7 @@ class Galaxy():
         
         return ani
     
-    def plot3dvid(self, downsampling=1,  xlim = None, ylim =None,  zlim =None, interval = 50, cmap = plt.cm.autumn, alpha=0.2,  s=10, **kwargs): 
+    def plot3dvid(self, downsampling=1, interval = 50,  xlim = None, ylim =None,  zlim =None, interval = 50, cmap = plt.cm.autumn, alpha=0.2,  s=10, **kwargs): 
         """
         Create a 3D video of the galaxy's movement.
 
