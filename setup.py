@@ -17,7 +17,7 @@ setuptools.setup(
      classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 1 - Planning",
-        "Intended Audience :: Astronomers",
+        "Intended Audience :: Science/Research",
         "Programming Language :: Python :: 3",
         "Operating System :: Unix",
         "Operating System :: MacOS :: MacOS X",
