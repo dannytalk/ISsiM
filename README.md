@@ -38,6 +38,8 @@ gal1 = issim.galgen.Galaxy(N, mass = M, radius = R, scaleheight = scaleheight,
 randvel = randvel,G = G,  k = k , n = n, nu = nu)
 simulation = gal1.simulate(smoothinglength = 0.04, tstep = 1, tEnd = tEnd)
 
+animation = gal1.quadplotvid(downsampling = 4)
+gal1.saveanim()
 ```
 
 ### Documentation
