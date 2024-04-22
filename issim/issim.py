@@ -420,7 +420,7 @@ def getAcc( pos, vel, m, h, k, n, nu, G ):
     a -= nu * vel
     return a
 
-def simulate(N, tstep, tEnd, pos, vel, masses, h, k, nu, G, plotRealTime = True, tStart = 0,  n = 4/3, simradius = 1):
+def simulate(N, tstep, tEnd, pos, vel, masses, h, k, nu, G, plotRealTime = True, tStart = 0,  n = 3, simradius = 1):
     """
     Simulate the movement of particles in a smoothed particle hydrodynamics (SPH) N-Body system using leapfrog integration.
 
