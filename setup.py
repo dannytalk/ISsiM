@@ -13,7 +13,7 @@ setuptools.setup(
      python_requires='>=3',
      url = "https://github.com/dannytalk/ISsiM",
      license = "MIT",
-     install_requires=["numpy", "scipy", "matplotlib","astropy", "IPython", "tqdm", "ffmpeg"]
+     install_requires=["numpy", "scipy", "matplotlib","astropy", "IPython", "tqdm", "ffmpeg"],
      classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 1 - Planning",
