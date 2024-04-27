@@ -22,8 +22,8 @@ import numpy as np
 N         = 5000    # Number of particles
 tEnd      = 3000     # time at which simulation ends
 dt        = 1   # timestep
-M         = 1      # star mass
-R         = 1   # star radius
+M         = 1      # galaxy mass
+R         = 1   # galaxy radius
 h         = 0.04    # smoothing length
 k         = 0.000004    # equation of state constant
 n         = 3      # polytropic index
