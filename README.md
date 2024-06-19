@@ -36,7 +36,7 @@ plotRealTime = True # switch on for plotting as the simulation goes along
 np.random.seed(42)     
 gal1 = issim.galgen.Galaxy(N, mass = M, radius = R, scaleheight = scaleheight,
 randvel = randvel,G = G,  k = k , n = n, nu = nu)
-simulation = gal1.simulate(smoothinglength = 0.04, tstep = 1, tEnd = tEnd)
+simulation = gal1.simulate(smoothinglength = h, tstep = dt, tEnd = tEnd)
 
 animation = gal1.quadplotvid(downsampling = 4)
 gal1.saveanim()
